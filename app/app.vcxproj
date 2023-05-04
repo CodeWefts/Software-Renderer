@@ -66,7 +66,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../renderer/include;../scene/include;../common/include;../third_party/GLAD/include;../third_party/GLFWx64/include;../third_party/toolBox/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../renderer/include;../scene/include;../common/include;../third_party/GLAD/include;../third_party/GLFWx64/include;../third_party/toolBox/include;../third_party/ImGui/include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>26451</DisableSpecificWarnings>
     </ClCompile>
     <Link>

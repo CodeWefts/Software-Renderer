@@ -17,8 +17,5 @@
     <ClInclude Include="include\scn\scene.h">
       <Filter>public</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene_impl.hpp">
-      <Filter>private</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

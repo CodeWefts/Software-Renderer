@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="src\renderer_impl.hpp">
-      <Filter>private</Filter>
-    </ClInclude>
     <ClInclude Include="include\rdr\renderer.h">
       <Filter>public</Filter>
     </ClInclude>
+    <ClInclude Include="include\rdr\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="public">
@@ -20,5 +18,6 @@
     <ClCompile Include="src\renderer.cpp">
       <Filter>private</Filter>
     </ClCompile>
+    <ClCompile Include="src\Vertex.cpp" />
   </ItemGroup>
 </Project>

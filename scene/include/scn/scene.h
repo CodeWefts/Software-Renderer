@@ -1,30 +1,20 @@
 #pragma once
 
-#ifdef SCN_EXPORTS
-#define SCN_API __declspec(dllexport)
-#else
-#define SCN_API __declspec(dllimport)
-#endif
+#include <vector>
 
-#ifdef __cplusplus
-extern "C"
+#include "rdr/Vertex.h"
+#include "rdr/renderer.h"
+
+class Scene
 {
-#endif
-    
-typedef struct scnImpl scnImpl;
-typedef struct rdrImpl rdrImpl;
+private:
+    std::vector<Vertex> m_Vertices;
 
-// Create/Destroy scene
-SCN_API scnImpl* scnCreate(void);
-SCN_API void scnDestroy(scnImpl* scene);
+public:
+    Scene();
+    ~Scene();
+    void Update(const float deltaTime, Renderer& renderer);
 
-// Update scene and renders it
-SCN_API void scnUpdate(scnImpl* scene, float deltaTime, rdrImpl* renderer);
-
-struct ImGuiContext;
-SCN_API void scnSetImGuiContext(scnImpl* scene, struct ImGuiContext* context);
-SCN_API void scnShowImGuiControls(scnImpl* scene);
-
-#ifdef __cplusplus
-}
-#endif
+    void SetImGuiContext(struct ImGuiContext* context);
+    void ShowImGuiControls(Renderer& renderer);
+};

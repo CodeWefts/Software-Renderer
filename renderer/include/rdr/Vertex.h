@@ -8,10 +8,10 @@
 class Vertex
 {
 public:
-    Vector3 m_Position;
-    Vector3 m_Color;
-    Vector3 m_Normal;
-    Vector2 m_Uvs;
+    Vector3 vPosition;
+    Vector3 vColor;
+    Vector3 vNormal;
+    Vector2 vUvs;
 
     Vertex(const Vector3& position);
     Vertex(const Vector3& position, const Vector3& color);

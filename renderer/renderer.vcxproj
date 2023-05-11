@@ -99,10 +99,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\rdr\renderer.h" />
+    <ClInclude Include="include\rdr\Texture.h" />
     <ClInclude Include="include\rdr\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\renderer.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Vertex.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,6 +18,7 @@ void printPPM(float* colorBuffer, int width, int height)
 
 int32_t SetupGlfw()
 {
+    //Check versionning
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
@@ -36,6 +37,7 @@ int32_t SetupGlfw()
 
 GLFWwindow* CreateWindow()
 {
+    //Creation of glfw window
     return glfwCreateWindow(800, 600, "Rasterizer", nullptr, nullptr);
 }
 
@@ -51,7 +53,7 @@ void SetupWindow(GLFWwindow* window)
 
 void SetupImGui(GLFWwindow* window)
 {
-    // Setup Dear ImGui context
+    // Setup ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -69,9 +71,9 @@ void SetupImGui(GLFWwindow* window)
     ImGui_ImplOpenGL3_Init(glslVersion);
 }
 
-void StartImGuiFrame()
+void StartImGuiFrame() 
 {
-    // Start the Dear ImGui frame
+    // Start ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -121,18 +123,11 @@ int main(int argc, char** argv)
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-
         StartImGuiFrame();
 
-        float deltaTime = ImGui::GetIO().DeltaTime;
-        
-        scene->Update(deltaTime, *renderer);
+        scene->Update(ImGui::GetIO().DeltaTime, *renderer);
 
-        // Imgui stuff here
-
-        // Rendering
         Render(window);
-
         glfwSwapBuffers(window);
     }
 

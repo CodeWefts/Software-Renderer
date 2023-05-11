@@ -1,42 +1,42 @@
 #include "rdr/Vertex.h"
 
 Vertex::Vertex(const Vector3& position)
-	: m_Position(position)
+	: vPosition(position)
 {
 }
 
 Vertex::Vertex(const Vector3& position, const Vector3& color)
-	: m_Position(position), m_Color(color)
+	: vPosition(position),vColor(color)
 {
 }
 
 Vertex::Vertex(const Vector3& position, const Vector3& color, const Vector3& normal, const Vector2 uv)
-	: m_Position(position), m_Color(color), m_Normal(normal), m_Uvs(uv)
+	: vPosition(position),vColor(color), vNormal(normal), vUvs(uv)
 {
 }
 
 void Vertex::SetPosition(const Vector3& position)
 {
-	m_Position = position;
+	vPosition = position;
 }
 
 void Vertex::SetColor(const Vector3& color)
 {
-	m_Color = color;
+	vColor = color;
 }
 
 void Vertex::SetNormal(const Vector3& normal)
 {
-	m_Normal = normal;
+	vNormal = normal;
 }
 
 void Vertex::SetUv(const Vector2 uv)
 {
-	m_Uvs = uv;
+	vUvs = uv;
 }
 
 void Vertex::SetPositionAndNormal(const Vector3& position)
 {
-	m_Position = position;
-	m_Normal = position.Normalize();
+	vPosition = position;
+	vNormal = position.Normalize();
 }

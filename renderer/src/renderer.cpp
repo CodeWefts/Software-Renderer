@@ -5,15 +5,22 @@
 #include "ImGui/imgui.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <algorithm>
 
 
-#define COLOR_BUFFER_POS(x, y) (m_Width * (y) + (x))
+#define COLOR_BUFFER_POS(x, y) (Width * (y) + (x))
 
 Renderer::Renderer(uint32_t width, uint32_t height)
-    : m_Width(width), m_Height(height)
+    :texture("../External/assets/girl.jpeg")
 {
-    m_ColorBuffer = new Vector3[width * height];
-    m_DepthBuffer = new float_t[width * height];
+    Width = width;
+    Height = height;
+
+    rWidth = (float_t)Width;
+    rHeight = (float_t)Height;
+
+    ColorBuffer = new Vector3[width * height];
+    DepthBuffer = new float_t[width * height];
 
     Eye.x = 0;
     Eye.y = 0;
@@ -27,7 +34,7 @@ Renderer::Renderer(uint32_t width, uint32_t height)
     Up.y = 1;
     Up.z = 0;
 
-    m_ClearColor = Vector3(0);
+    ClearColor = Vector3(0);
 
     CreateFrameBuffer();
 }
@@ -35,66 +42,38 @@ Renderer::Renderer(uint32_t width, uint32_t height)
 Renderer::~Renderer()
 {
     DestroyFrameBuffer();
-    delete[] m_ColorBuffer;
-    delete[] m_DepthBuffer;
-}
-
-void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& dst)
-{
-    assert(zFar > zNear && "Z depth far must be greather that Z depth near");
-    __assume(zFar > zNear);
-
-    // cot(fovY / 2.0f)
-    const float f = 1.0f / std::tan(fovY / 2.0f);
-    const float zDiff = zFar - zNear;
-
-    const float r00 = f / aspectRatio;
-    const float r22 = -(zFar + zNear) / zDiff;
-    const float r23 = -(2 * zFar * zNear) / zDiff;
-
-    dst.Row0 = Vector4(r00, 0.0f, 0.0f, 0.0f);
-    dst.Row1 = Vector4(0.0f, f, 0.0f, 0.0f);
-    dst.Row2 = Vector4(0.0f, 0.0f, r22, r23);
-    dst.Row3 = Vector4(0.0f, 0.0f, -1.0f, 0.0f);
-}
-
-float Renderer::DotProduct(const Vector3& a, const Vector3& b)
-{
-    float result = a.x * b.x + a.y * b.y + a.z * b.z;
-    return result;
+    delete[] ColorBuffer;
+    delete[] DepthBuffer;
 }
 
 Vector3 Renderer::LocalToScreen(const Vertex& vertex)
 {
-    const Vector3& position = vertex.m_Position;
+    const Vector3& position = vertex.vPosition;
 
     // Convert to homogenous coords
     Vector4 coords = Vector4(position.x, position.y, position.z, 1.0f);
 
     // Calculate MVP
-    Matrix4x4 mvp = m_Projection;
-
-    mvp.Multiply(m_View);
-
-    mvp.Multiply(m_Model);
+    Matrix4x4 mvp = (Projection * View) * Model;
 
     // Apply MVP on coords
-    coords = mvp.Multiply(coords);
-    
+    Vector4 crds;
+    crds = mvp * coords;
+
     // Calculate NDC
-    Vector4 ndc = Vector4(coords.x / coords.w, coords.y / coords.w, coords.z / coords.w, coords.w / coords.w);
+    Vector4 ndc = Vector4(crds.x / crds.w, crds.y / crds.w, crds.z / crds.w, crds.w / crds.w);
 
     // Apply viewport
     Vector3 screenCoords = Vector3(
-        (m_Width / 2.0f) * (ndc.x + 1),
-        (m_Height / 2.0f) * (ndc.y + 1),
+        (Width / 2.0f) * (ndc.x + 1),
+        (Height / 2.0f) * (ndc.y + 1),
         0.5f * ndc.z + 0.5f
     );
 
     return screenCoords;
 }
 
-void Renderer::ViewMatrix(const Vector3 & eye, const Vector3 & center, const Vector3 & up, Matrix4x4 & dst)
+void Renderer::ViewMatrix(const Vector3& eye, const Vector3& center, const Vector3& up, Matrix4x4& matrix)
 {
     const Vector3 _up = up.Normalize();
 
@@ -106,42 +85,60 @@ void Renderer::ViewMatrix(const Vector3 & eye, const Vector3 & center, const Vec
     const float r13 = -Vector3::DotProduct(y, eye);
     const float r23 = -Vector3::DotProduct(z, eye);
 
-    dst.Row0 = Vector4(x.x, x.y, x.z, r03);
-    dst.Row1 = Vector4(y.x, y.y, y.z, r13);
-    dst.Row2 = Vector4(z.x, z.y, z.z, r23);
-    dst.Row3 = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+    matrix.value = { 
+        { x.x, x.y, x.z, r03 },
+        { y.x, y.y, y.z, r13 },
+        { z.x, z.y, z.z, r23 },
+        { 0.0f, 0.0f, 0.0f, 1.0f }
+    };
 }
 
-void Renderer::SetModelMatrix(const Matrix4x4& model)
+void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix)
 {
-    m_Model.Row0 = Vector4(1, 0, 0, 0);
-    m_Model.Row1 = Vector4(0, 1, 0, 0);
-    m_Model.Row2 = Vector4(0, 0, 1, 0);
-    m_Model.Row3 = Vector4(0, 0, 0, 1);
-    //TRS
+    assert(zFar > zNear && "Z depth far must be greather that Z depth near");
+    __assume(zFar > zNear);
+
+    const float f = 1.0f / std::tan(fovY / 2.0f);
+    const float zDiff = zFar - zNear;
+
+    const float r00 = f / aspectRatio;
+    const float r22 = -(zFar + zNear) / zDiff;
+    const float r23 = -(2 * zFar * zNear) / zDiff;
+
+    matrix.value = {
+        { r00, 0.0f, 0.0f, 0.0f },
+        { 0.0f, f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, r22, r23 },
+        { 0.0f, 0.0f, -1.0f, 0.0f }
+    };
+}
+
+void Renderer::SetModelMatrix()
+{
+    Model.IdentityMatrix();
 }
 
 bool Renderer::SetPixel(const uint32_t x, const uint32_t y)
 {
-    if (x < 0 || x >= m_Width)
+    if (x < 0 || x >= Width)
         return false;
 
-    if (y < 0 || y >= m_Height)
+    if (y < 0 || y >= Height)
         return false;
 
-    m_ColorBuffer[COLOR_BUFFER_POS(x, y)] = Vector3(1);
+    ColorBuffer[COLOR_BUFFER_POS(x, y)] = Vector3(1);
     return true;
 }
 
 bool Renderer::SetPixel(const uint32_t x, const uint32_t y, const Vector3& color)
 {
-    if (x < 0 || x >= m_Width)
+    if (x < 0 || x >= Width)
         return false;
 
-    if (y < 0 || y >= m_Height)
+    if (y < 0 || y >= Height)
         return false;
 
-    m_ColorBuffer[COLOR_BUFFER_POS(x, y)] = color;
+    ColorBuffer[COLOR_BUFFER_POS(x, y)] = color;
     return true;
 }
 
@@ -213,86 +210,30 @@ void Renderer::DrawLine(uint32_t x0, uint32_t y0, const uint32_t x1, const uint3
     }
 }
 
-void Renderer::Render(const std::vector<Vertex>& vertices)
-{
-    ViewMatrix(Eye, Center, Up, m_View);
-    ProjectionMatrix(M_PI / 2, (float)m_Width / m_Height, 0.1f, 100.f, m_Projection);
-    SetModelMatrix(m_Model);
-    //std::cout << m_Model << "\n\n" << m_View << "\n\n" << m_Projection << endl;
-
-    std::vector<Vector3> NewVertices = std::vector<Vector3>(vertices.size());
-
-    for (size_t i = 0; i < vertices.size(); i++)
-    {
-        const Vertex& index = vertices[i];
-
-        Vector3 coords = index.m_Position;
-        NewVertices[i] = LocalToScreen(coords);
-    }
-
-    for (size_t i = 0; i < vertices.size(); i++)
-    {
-        Vector3 p1 = NewVertices[i];
-        Vector3 p2 = NewVertices[(i + 1) % vertices.size()];
-        Vector3 p3 = NewVertices[(i + 2) % vertices.size()];
-
-        DrawTriangle(p1, p2, p3, vertices[i], vertices[(i + 1) % vertices.size()], vertices[(i + 2) % vertices.size()]);
-    }
-
-    UpdateFrameBuffer();
-    if (ImGui::Begin("FrameBuffer"))
-    {
-        ImVec2 size = ImVec2(m_Width, m_Height);
-
-        ImGui::Image((ImTextureID)m_TextureId, size);
-
-        ImGui::End();
-    }
-}
-
-void Renderer::CreateFrameBuffer()
-{
-    glGenTextures(1, &m_TextureId);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Renderer::UpdateFrameBuffer()
-{
-    /*DrawLine(60, 180, 240, 180, IM_COL32_BLACK);
-    DrawLine(240, 180, 150, 90, IM_COL32_BLACK);
-    DrawLine(150, 90, 60, 180, IM_COL32_BLACK);*/
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_FLOAT, m_ColorBuffer);
-}
-
-void Renderer::DestroyFrameBuffer()
-{
-    glDeleteTextures(1, &m_TextureId);
-}
-
-void Renderer::ApplyClearColor()
-{
-    for (uint32_t y = 0; y < m_Height; y++)
-    {
-        for (uint32_t x = 0; x < m_Width; x++)
-        {
-            m_ColorBuffer[y * m_Width + x] = m_ClearColor;
-        }
-    }
-}
-
 void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
-    for (unsigned int x = 0; x < m_Width; x++)
+
+    float miniX;
+    float miniY;
+    float maxiX;
+    float maxiY;
+
+    miniX = std::min(p1.x, std::min(p2.x, p3.x));
+    miniY = std::min(p1.y, std::min(p2.y, p3.y));
+
+    maxiX = std::max(p1.x, std::max(p2.x, p3.x));
+    maxiY = std::max(p1.y, std::max(p2.y, p3.y));
+
+    miniX = std::clamp(miniX, 0.f, rWidth);
+    miniY = std::clamp(miniY, 0.f, rHeight);
+    maxiX = std::clamp(maxiX, 0.f, rWidth);
+    maxiY = std::clamp(maxiY, 0.f, rHeight);
+
+    
+
+    for (unsigned int x = miniX; x < maxiX; x++)
     {
-        for (unsigned int y = 0; y < m_Height; y++)
+        for (unsigned int y = miniY; y < maxiY; y++)
         {
             const float denominator = (p2.y - p3.y) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.y - p3.y);
 
@@ -308,27 +249,88 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
             if (w3 < 0)
                 continue;
 
-            const Vector3 color = v1.m_Color * w1 + v2.m_Color * w2 + v3.m_Color * w3;
+            Vector3 color = v1.vColor * w1 + v2.vColor * w2 + v3.vColor * w3;
+
+            const Vector2 uv = v1.vUvs * w1 + v2.vUvs * w2 + v3.vUvs * w3;
+
+            color = texture.Sample(uv.x, uv.y);
 
             SetPixel(x, y , color);
         }
     }
 }
 
-/*
-void rdrSetTexture(rdrImpl* renderer, float* colors32Bits, int width, int height)
+void Renderer::Render(const std::vector<Vertex>& vertices)
 {
-    assert(renderer != nullptr);
-    // TODO(later): Store
+    //Matrix
+    ViewMatrix(Eye, Center, Up, View);
+    ProjectionMatrix(M_PI / 2, (float)Width / Height, 0.1f, 100.f, Projection);
+    SetModelMatrix();
+
+    std::vector<Vector3> NewVertices = std::vector<Vector3>(vertices.size());
+
+    for (size_t i = 0; i < vertices.size(); i++)
+    {
+        NewVertices[i] = LocalToScreen(vertices[i].vPosition);
+    }
+
+    for (size_t i = 0; i < vertices.size(); i++)
+    {
+        Vector3 p1 = NewVertices[i];
+        Vector3 p2 = NewVertices[(i + 1) % vertices.size()];
+        Vector3 p3 = NewVertices[(i + 2) % vertices.size()];
+
+        DrawTriangle(p1, p2, p3, vertices[i], vertices[(i + 1) % vertices.size()], vertices[(i + 2) % vertices.size()]);
+        //DrawLine(vertices[i].vPosition.x, vertices[i].vPosition.y, vertices[i + 1].vPosition.x, vertices[i + 1].vPosition.y, (0, 0, 0));
+    }
+
+    UpdateFrameBuffer();
+    if (ImGui::Begin("FrameBuffer"))
+    {
+        ImVec2 size = ImVec2(Width, Height);
+
+        ImGui::Image((ImTextureID)TextureId, size);
+
+        ImGui::End();
+    }
 }
 
-void Renderer::rdrDrawTriangles(rdrImpl* renderer, rdrVertex* vertices, int count)
+void Renderer::CreateFrameBuffer()
 {
-    assert(renderer != nullptr);
+    glGenTextures(1, &TextureId);
+    glBindTexture(GL_TEXTURE_2D, TextureId);
 
-    // For each triangles
-    // TODO: Convert vertex local coords to screen coords
-    // TODO: Draw triangle with lines (using drawLine)
-    // Transform vertex list to triangle into colorBuffer
-}*/
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_FLOAT, nullptr);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::UpdateFrameBuffer()
+{
+    /*DrawLine(60, 180, 240, 180, IM_COL32_BLACK);
+    DrawLine(240, 180, 150, 90, IM_COL32_BLACK);
+    DrawLine(150, 90, 60, 180, IM_COL32_BLACK);*/
+    glBindTexture(GL_TEXTURE_2D, TextureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_FLOAT, ColorBuffer);
+}
+
+void Renderer::DestroyFrameBuffer()
+{
+    glDeleteTextures(1, &TextureId);
+}
+
+void Renderer::ApplyClearColor()
+{
+    // Range of pixels
+    for (uint32_t y = 0; y < Height; y++)
+    {
+        for (uint32_t x = 0; x < Width; x++)
+        {
+            //Clear the pixel w/ empty vector3 ClearColor
+            ColorBuffer[y * Width + x] = ClearColor;
+        }
+    }
+}

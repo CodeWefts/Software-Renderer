@@ -4,7 +4,10 @@
 
 using namespace std;
 
+Matrix::Matrix()
+{
 
+}
 Matrix::Matrix(unsigned int m_matrixRow, unsigned int m_matrixColumn, double defaultValue)
 {
 	m_row = m_matrixRow;
@@ -71,10 +74,7 @@ Matrix Matrix::operator-(const Matrix& otherMatrix)
 	return newMatrix;
 }
 
-Matrix::Matrix()
-{
 
-}
 
 Matrix Matrix::operator*(const Matrix& otherMatrix)
 {

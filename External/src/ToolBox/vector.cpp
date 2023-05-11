@@ -157,3 +157,13 @@ Vector2::Vector2(float x, float y)
 {
 
 }
+
+Vector2 Vector2::operator*(const float k) const
+{
+	return Vector2(x * k, y * k);
+}
+
+Vector2 Vector2::operator+(const Vector2& vec) const
+{
+	return Vector2(vec.x + x, vec.y + y);
+}

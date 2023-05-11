@@ -3,14 +3,26 @@
 
 Scene::Scene()
 {
-    m_Vertices.clear();
+    vertices.clear();
 
-    m_Vertices.push_back(Vertex(Vector3({-0.5f, -0.5f, 0.0f}), Vector3({1.0f, 0.0f, 0.0f}),
-        Vector3({ 0.0f, 0.0f, 0.0f }), Vector2(0.0f, 0.0f)));
-    m_Vertices.push_back(Vertex(Vector3({ 0.5f, -0.5f, 0.0f }), Vector3({ 0.0f, 1.0f, 0.0f}),
-        Vector3({ 0.0f, 0.0f, 0.0f }), Vector2(0.0f, 0.0f)));
-    m_Vertices.push_back(Vertex(Vector3({ 0.0f, 0.5f, 0.0f }), Vector3({ 0.0f, 0.0f, 1.0f}),
-        Vector3({ 0.0f, 0.0f, 0.0f }), Vector2({ 0.0f, 0.0f })));
+    vertices.push_back(Vertex(
+        Vector3({-0.5f, -0.5f, 0.0f}), 
+        Vector3({1.0f, 0.0f, 0.0f}),
+        Vector3({ 0.0f, 0.0f, 0.0f }), 
+        Vector2(0.0f, 0.0f))
+    );
+    vertices.push_back(Vertex(
+        Vector3({ 0.5f, -0.5f, 0.0f }), 
+        Vector3({ 0.0f, 1.0f, 0.0f}),
+        Vector3({ 0.0f, 0.0f, 0.0f }), 
+        Vector2(1.0f, 0.0f))
+    );
+    vertices.push_back(Vertex(
+        Vector3({ 0.0f, 0.5f, 0.0f }), 
+        Vector3({ 0.0f, 0.0f, 1.0f}),
+        Vector3({ 0.0f, 0.0f, 0.0f }), 
+        Vector2({ 0.5f, 1.0f }))
+    );
 }
 
 Scene::~Scene()
@@ -20,22 +32,27 @@ Scene::~Scene()
 
 void Scene::Update(const float deltaTime, Renderer& renderer)
 {
+
     ShowImGuiControls(renderer);
     renderer.ApplyClearColor();
-    renderer.Render(m_Vertices);
+    renderer.Render(vertices);
     
 }
 
 void Scene::SetImGuiContext(struct ImGuiContext* context)
 {
-
+    // ?
 }
 
 void Scene::ShowImGuiControls(Renderer& renderer)
 {
+    /** test1
+    * test
+    *
+    */
     if (ImGui::Begin("Controls"))
     {
-        ImGui::ColorPicker3("Clear color", &renderer.m_ClearColor.x);
+        ImGui::ColorPicker3("Clear color", &renderer.ClearColor.x);
         ImGui::SliderFloat("eyeX %f", &renderer.Eye.x, -10, 10);
         ImGui::SliderFloat("eyeY %f", &renderer.Eye.y, -10, 10);
         ImGui::SliderFloat("eyeZ %f", &renderer.Eye.z, -10, 10);

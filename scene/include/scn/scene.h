@@ -8,13 +8,13 @@
 class Scene
 {
 private:
-    std::vector<Vertex> m_Vertices;
+    std::vector<Vertex> vertices;
 
 public:
     Scene();
     ~Scene();
     void Update(const float deltaTime, Renderer& renderer);
 
-    void SetImGuiContext(struct ImGuiContext* context);
+    void SetImGuiContext(struct ImGuiContext* context); // ?
     void ShowImGuiControls(Renderer& renderer);
 };

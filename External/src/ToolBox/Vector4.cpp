@@ -2,6 +2,7 @@
 #include <assert.h>
 
 
+
 Vector4::Vector4()
 	:w(0), x(0), y(0), z(0)
 {

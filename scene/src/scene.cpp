@@ -5,6 +5,7 @@ Scene::Scene()
 {
     vertices.clear();
 
+    /*
     vertices.push_back(Vertex(
         Vector3({-0.5f, -0.5f, 0.0f}), 
         Vector3({1.0f, 0.0f, 0.0f}),
@@ -22,7 +23,10 @@ Scene::Scene()
         Vector3({ 0.0f, 0.0f, 1.0f}),
         Vector3({ 0.0f, 0.0f, 0.0f }), 
         Vector2({ 0.5f, 1.0f }))
-    );
+    );*/
+
+    Renderer::loadModel(vertices);
+
 }
 
 Scene::~Scene()
@@ -46,12 +50,13 @@ void Scene::SetImGuiContext(struct ImGuiContext* context)
 
 void Scene::ShowImGuiControls(Renderer& renderer)
 {
-    /** test1
-    * test
-    *
-    */
+    ImGuiIO io = ImGui::GetIO();
+
     if (ImGui::Begin("Controls"))
     {
+
+        ImGui::Text("%f \n", io.Framerate);
+
         ImGui::ColorPicker3("Clear color", &renderer.ClearColor.x);
         ImGui::SliderFloat("eyeX %f", &renderer.Eye.x, -10, 10);
         ImGui::SliderFloat("eyeY %f", &renderer.Eye.y, -10, 10);

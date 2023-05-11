@@ -54,6 +54,9 @@
     <ClCompile Include="src\ToolBox\Vector4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\stblImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ImGui\imstb_rectpack.h">
@@ -65,10 +68,5 @@
     <ClInclude Include="include\std_image\std_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\girl.jpeg">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

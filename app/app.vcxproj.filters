@@ -3,4 +3,8 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\rd_shit.jpeg" />
+    <Image Include="assets\girl.jpeg" />
+  </ItemGroup>
 </Project>

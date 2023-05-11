@@ -1,5 +1,9 @@
 #include "rdr/Vertex.h"
 
+Vertex::Vertex()
+{
+}
+
 Vertex::Vertex(const Vector3& position)
 	: vPosition(position)
 {

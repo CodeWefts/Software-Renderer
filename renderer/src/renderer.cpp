@@ -3,6 +3,8 @@
 #include <cmath>
 #include "glad/glad.h"
 #include "ImGui/imgui.h"
+#include <../include/TinyObj/tiny_obj_loader.h>
+#define TINYOBJLOADER_IMPLEMENTATION
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <algorithm>
@@ -11,7 +13,7 @@
 #define COLOR_BUFFER_POS(x, y) (Width * (y) + (x))
 
 Renderer::Renderer(uint32_t width, uint32_t height)
-    :texture("../External/assets/girl.jpeg")
+    :texture("assets/viking_room.jpeg")
 {
     Width = width;
     Height = height;
@@ -95,7 +97,7 @@ void Renderer::ViewMatrix(const Vector3& eye, const Vector3& center, const Vecto
 
 void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix)
 {
-    assert(zFar > zNear && "Z depth far must be greather that Z depth near");
+    //assert(zFar > zNear && "Z depth far must be greather that Z depth near");
     __assume(zFar > zNear);
 
     const float f = 1.0f / std::tan(fovY / 2.0f);
@@ -113,10 +115,7 @@ void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const
     };
 }
 
-void Renderer::SetModelMatrix()
-{
-    Model.IdentityMatrix();
-}
+
 
 bool Renderer::SetPixel(const uint32_t x, const uint32_t y)
 {
@@ -212,7 +211,7 @@ void Renderer::DrawLine(uint32_t x0, uint32_t y0, const uint32_t x1, const uint3
 
 void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
-
+    
     float miniX;
     float miniY;
     float maxiX;
@@ -224,10 +223,10 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
     maxiX = std::max(p1.x, std::max(p2.x, p3.x));
     maxiY = std::max(p1.y, std::max(p2.y, p3.y));
 
-    miniX = std::clamp(miniX, 0.f, rWidth);
-    miniY = std::clamp(miniY, 0.f, rHeight);
-    maxiX = std::clamp(maxiX, 0.f, rWidth);
-    maxiY = std::clamp(maxiY, 0.f, rHeight);
+    miniX = std::clamp(miniX, 0.f, (float)rWidth);
+    miniY = std::clamp(miniY, 0.f, (float)rHeight);
+    maxiX = std::clamp(maxiX, 0.f, (float)rWidth);
+    maxiY = std::clamp(maxiY, 0.f, (float)rHeight);
 
     
 
@@ -249,6 +248,17 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
             if (w3 < 0)
                 continue;
 
+            float posZ = p1.z * w1 + p2.z * w2 + p3.z * w3;
+
+            if (DepthBuffer[y * Width + x] > posZ)
+            {
+                DepthBuffer[y * Width + x] = posZ;
+            }
+
+            else
+            {
+                continue;
+            }
             Vector3 color = v1.vColor * w1 + v2.vColor * w2 + v3.vColor * w3;
 
             const Vector2 uv = v1.vUvs * w1 + v2.vUvs * w2 + v3.vUvs * w3;
@@ -260,28 +270,73 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
     }
 }
 
+void Renderer::loadModel(std::vector<Vertex>& vertices)
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "assets/viking_room.obj"))
+    {
+        throw std::runtime_error(warn + err);
+    }
+
+    for (const auto& shape : shapes)
+    {
+        for (const auto& index : shape.mesh.indices)
+        {
+            Vertex vertex{};
+
+            vertex.vPosition = {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2]
+            };
+
+            vertex.vNormal = {
+                attrib.normals[3 * index.normal_index + 0],
+                attrib.normals[3 * index.normal_index + 1],
+                attrib.normals[3 * index.normal_index + 2]
+            };
+
+            vertex.vColor = { 1.0f, 1.0f, 1.0f };
+
+            vertex.vUvs = {
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+            };
+
+            vertices.push_back(vertex);
+        }
+    }
+}
+
 void Renderer::Render(const std::vector<Vertex>& vertices)
 {
     //Matrix
     ViewMatrix(Eye, Center, Up, View);
     ProjectionMatrix(M_PI / 2, (float)Width / Height, 0.1f, 100.f, Projection);
-    SetModelMatrix();
+    Model.IdentityMatrix();
+
 
     std::vector<Vector3> NewVertices = std::vector<Vector3>(vertices.size());
 
     for (size_t i = 0; i < vertices.size(); i++)
     {
+        const Vertex& index = vertices[i];
+
+        Vector3 coords = index.vPosition;
         NewVertices[i] = LocalToScreen(vertices[i].vPosition);
     }
 
-    for (size_t i = 0; i < vertices.size(); i++)
+    for (size_t i = 0; i < vertices.size() / 3; i++)
     {
-        Vector3 p1 = NewVertices[i];
-        Vector3 p2 = NewVertices[(i + 1) % vertices.size()];
-        Vector3 p3 = NewVertices[(i + 2) % vertices.size()];
+        Vector3 p1 = NewVertices[3 * i];
+        Vector3 p2 = NewVertices[(3 * i + 1)];
+        Vector3 p3 = NewVertices[(3 * i + 2)];
 
-        DrawTriangle(p1, p2, p3, vertices[i], vertices[(i + 1) % vertices.size()], vertices[(i + 2) % vertices.size()]);
-        //DrawLine(vertices[i].vPosition.x, vertices[i].vPosition.y, vertices[i + 1].vPosition.x, vertices[i + 1].vPosition.y, (0, 0, 0));
+        DrawTriangle(p1, p2, p3, vertices[3 * i], vertices[(3 * i + 1)], vertices[(3 * i + 2)]);
     }
 
     UpdateFrameBuffer();
@@ -310,9 +365,6 @@ void Renderer::CreateFrameBuffer()
 
 void Renderer::UpdateFrameBuffer()
 {
-    /*DrawLine(60, 180, 240, 180, IM_COL32_BLACK);
-    DrawLine(240, 180, 150, 90, IM_COL32_BLACK);
-    DrawLine(150, 90, 60, 180, IM_COL32_BLACK);*/
     glBindTexture(GL_TEXTURE_2D, TextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_FLOAT, ColorBuffer);
 }
@@ -331,6 +383,8 @@ void Renderer::ApplyClearColor()
         {
             //Clear the pixel w/ empty vector3 ClearColor
             ColorBuffer[y * Width + x] = ClearColor;
+            DepthBuffer[y * Width + x] = INFINITY;
+
         }
     }
 }

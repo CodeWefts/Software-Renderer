@@ -13,6 +13,7 @@ public:
     Vector3 vNormal;
     Vector2 vUvs;
 
+    Vertex();
     Vertex(const Vector3& position);
     Vertex(const Vector3& position, const Vector3& color);
     Vertex(const Vector3& position, const Vector3& color, const Vector3& normal, const Vector2 uv);

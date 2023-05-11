@@ -42,6 +42,8 @@ private:
 
     uint32_t TextureId;
 
+    
+
     void CreateFrameBuffer();
     void UpdateFrameBuffer();
     void DestroyFrameBuffer();
@@ -52,13 +54,24 @@ public:
     Vector3 Center;
     Vector3 Up;
 
+    //3D MODEL LOADING
+    const uint32_t WIDTH = 800;
+    const uint32_t HEIGHT = 600;
+
+    static void loadModel(std::vector<Vertex>& vertices);
+
+    const std::string MODEL_PATH = "assets/vikingRoom.obj";
+    const std::string TEXTURE_PATH = "assets/viking_room.jpeg";
+
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
     void ApplyClearColor();
     Renderer(uint32_t width, uint32_t height);
     ~Renderer();
 
     void ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix);
     void ViewMatrix(const Vector3& eye, const Vector3& center, const Vector3& up, Matrix4x4& dst);
-    void SetModelMatrix();
 
     Vector3 LocalToScreen(const Vertex& vertex);
     void DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3);

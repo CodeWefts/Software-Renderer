@@ -15,6 +15,5 @@ public:
     ~Scene();
     void Update(const float deltaTime, Renderer& renderer);
 
-    void SetImGuiContext(struct ImGuiContext* context); // ?
     void ShowImGuiControls(Renderer& renderer);
 };

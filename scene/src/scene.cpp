@@ -5,6 +5,8 @@ Scene::Scene()
 {
     vertices.clear();
 
+
+    // Uncomment this vertices to display triangle
     /*
     vertices.push_back(Vertex(
         Vector3({-0.5f, -0.5f, 0.0f}), 
@@ -23,8 +25,11 @@ Scene::Scene()
         Vector3({ 0.0f, 0.0f, 1.0f}),
         Vector3({ 0.0f, 0.0f, 0.0f }), 
         Vector2({ 0.5f, 1.0f }))
-    );*/
+    );
+    */
 
+
+    // Load 3D object
     Renderer::loadModel(vertices);
 
 }
@@ -43,13 +48,9 @@ void Scene::Update(const float deltaTime, Renderer& renderer)
     
 }
 
-void Scene::SetImGuiContext(struct ImGuiContext* context)
-{
-    // ?
-}
-
 void Scene::ShowImGuiControls(Renderer& renderer)
 {
+    //ImGUI 
     ImGuiIO io = ImGui::GetIO();
 
     if (ImGui::Begin("Controls"))

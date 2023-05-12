@@ -97,7 +97,6 @@ void Renderer::ViewMatrix(const Vector3& eye, const Vector3& center, const Vecto
 
 void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix)
 {
-    //assert(zFar > zNear && "Z depth far must be greather that Z depth near");
     __assume(zFar > zNear);
 
     const float f = 1.0f / std::tan(fovY / 2.0f);
@@ -211,7 +210,9 @@ void Renderer::DrawLine(uint32_t x0, uint32_t y0, const uint32_t x1, const uint3
 
 void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
-    
+
+
+    // SET CLAMP   
     float miniX;
     float miniY;
     float maxiX;
@@ -229,7 +230,7 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
     maxiY = std::clamp(maxiY, 0.f, (float)rHeight);
 
     
-
+    // Color Interpolation
     for (unsigned int x = miniX; x < maxiX; x++)
     {
         for (unsigned int y = miniY; y < maxiY; y++)
@@ -263,6 +264,7 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
 
             const Vector2 uv = v1.vUvs * w1 + v2.vUvs * w2 + v3.vUvs * w3;
 
+            //Load texture
             color = texture.Sample(uv.x, uv.y);
 
             SetPixel(x, y , color);

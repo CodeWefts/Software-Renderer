@@ -70,8 +70,8 @@ public:
     Renderer(uint32_t width, uint32_t height);
     ~Renderer();
 
-    void ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix);
     void ViewMatrix(const Vector3& eye, const Vector3& center, const Vector3& up, Matrix4x4& dst);
+    void ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix);
 
     Vector3 LocalToScreen(const Vertex& vertex);
     void DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3);
@@ -87,14 +87,3 @@ public:
     void Render(const std::vector<Vertex>& vertices);
 
 };
-
-/*
-// Texture setup
-RDR_API void rdrSetTexture(rdrImpl* renderer, float* colors32Bits, int width, int height);
-
-// Draw a list of triangles
-RDR_API void rdrDrawTriangles(rdrImpl* renderer, rdrVertex* vertices, int vertexCount);
-
-struct ImGuiContext;
-RDR_API void rdrSetImGuiContext(rdrImpl* renderer, struct ImGuiContext* context);
-RDR_API void rdrShowImGuiControls(rdrImpl* renderer);*/

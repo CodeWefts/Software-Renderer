@@ -11,10 +11,6 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
-void printPPM(float* colorBuffer, int width, int height)
-{
-    // TODO: print ppm format
-}
 
 int32_t SetupGlfw()
 {
@@ -130,10 +126,6 @@ int main(int argc, char** argv)
         Render(window);
         glfwSwapBuffers(window);
     }
-
-    // scnUpdate(scene, 1.f / 60.f, renderer);
-
-    // printPPM(colorBuffer, width, height);
 
     delete scene;
     delete renderer;

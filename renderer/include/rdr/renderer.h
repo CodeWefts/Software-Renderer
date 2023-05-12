@@ -5,11 +5,15 @@
 #include "ToolBox/Matrix4x4.hpp"
 #include "rdr/Vertex.h"
 #include "Texture.h"
+#include "light.h"
 
 
 class Renderer
 {
 private:
+
+    std::vector<Light> m_Lights;
+
     uint32_t Width;
     uint32_t Height;
 
@@ -72,6 +76,10 @@ public:
 
     void ViewMatrix(const Vector3& eye, const Vector3& center, const Vector3& up, Matrix4x4& dst);
     void ProjectionMatrix(const float fovY, const float aspectRatio, const float zNear, const float zFar, Matrix4x4& matrix);
+    void ModelMatrix(const Vector3& translation, const Vector3& rotation, const Vector3& scale);
+    Vector3 ViewportTrans(Vector3 ndc);
+
+    Vector3 ApplyLights(Vector3 color, const Vertex& v1, Vector3 ViewPos, Vector3 LightDir, Vector3 FragPos);
 
     Vector3 LocalToScreen(const Vertex& vertex);
     void DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3);

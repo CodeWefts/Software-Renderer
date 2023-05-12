@@ -6,6 +6,7 @@
     </ClInclude>
     <ClInclude Include="include\rdr\Vertex.h" />
     <ClInclude Include="include\rdr\Texture.h" />
+    <ClInclude Include="include\rdr\light.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="public">
@@ -21,5 +22,6 @@
     </ClCompile>
     <ClCompile Include="src\Vertex.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\light.cpp" />
   </ItemGroup>
 </Project>

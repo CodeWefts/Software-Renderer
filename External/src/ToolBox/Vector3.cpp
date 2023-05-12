@@ -85,6 +85,11 @@ float Vector3::DotProduct(const Vector3& a, const Vector3& b)
 	return result;
 }
 
+Vector3 Vector3::operator*(const Vector3& vec) const
+{
+	return Vector3(vec.x * x, vec.y * y, vec.z * z);
+}
+
 /*
 Vector3 Vector3::operator=(const Vector3& vec)
 {

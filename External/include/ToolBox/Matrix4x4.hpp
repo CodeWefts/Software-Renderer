@@ -17,4 +17,6 @@ public:
 	Vector4 operator*(const Vector4& vect);
 	
 	Matrix4x4 IdentityMatrix();
+	//Matrix4x4 rotationMatrix3X3(float_t x, float_t y, float_t z, float_t angle);
+	//Matrix4x4 TRS(Vector4& angle, Vector4& vectorTrans, Vector4& vectorScaling, Vector4& axes);
 };

@@ -8,13 +8,13 @@ Matrix::Matrix()
 {
 
 }
-Matrix::Matrix(unsigned int m_matrixRow, unsigned int m_matrixColumn, double defaultValue)
+Matrix::Matrix(unsigned int m_matrixRow, unsigned int m_matrixColumn, float_t defaultValue)
 {
 	m_row = m_matrixRow;
 	m_column = m_matrixColumn;
 	for (int i = 0; i < m_row; i++)
 	{
-		vector<double> tab(m_column, defaultValue);
+		vector<float_t> tab(m_column, defaultValue);
 		m_matrix.push_back(tab);
 	}
 }
@@ -26,7 +26,7 @@ Matrix::Matrix(const Matrix& copiedMatrix)
 	m_column = copiedMatrix.m_column;
 }
 
-Matrix::Matrix(vector<vector<double> > matrix)
+Matrix::Matrix(vector<vector<float_t> > matrix)
 {
 	m_row = matrix.size();
 	m_column = matrix[0].size();
@@ -144,7 +144,7 @@ ostream & operator<<(ostream & os, const Matrix & matrix)
 		os << "[";
 		for (int j = 0; j < matrix.m_column; j++)
 		{
-			double value = matrix.m_matrix[i][j];
+			float_t value = matrix.m_matrix[i][j];
 			os << value;
 			if (j < matrix.m_column - 1)
 			{
@@ -212,10 +212,10 @@ Vector Matrix::diagMatrix()
 	return diag;
 }
 
-double Matrix::detMatrix()
+float_t Matrix::detMatrix()
 {
 	assert(m_row == m_column);
-	double det = 0;
+	float_t det = 0;
 
 	if (m_row == 2)
 	{
@@ -223,10 +223,10 @@ double Matrix::detMatrix()
 	}
 	for (int i = 0; i < m_row; i++)
 	{
-		vector<vector<double> > tab1;
+		vector<vector<float_t> > tab1;
 		for (int currentRow = 0; currentRow < m_row; currentRow++)
 		{
-			vector<double> tab2;
+			vector<float_t> tab2;
 			if (currentRow != i)
 			{
 				for (int j = 1; j < m_column; j++)
@@ -250,9 +250,9 @@ double Matrix::detMatrix()
 	return det;
 }
 
-double Matrix::traceMatrix()
+float_t Matrix::traceMatrix()
 {
-	double trace = 0;
+	float_t trace = 0;
 	Vector vec = diagMatrix();
 	
 	for (int i = 0; i < m_row; i++)
@@ -317,7 +317,7 @@ Matrix Matrix::swapMatrix(int indexMin, int indexMax)
 	return newMatrix;
 }
 
-Matrix Matrix::alphaCalculate(double indexPivot, int indexAlpha)
+Matrix Matrix::alphaCalculate(float_t indexPivot, int indexAlpha)
 {
 	Matrix matrix1(1, m_column), matrix2(1, m_column);
 	matrix2.m_matrix[0] = m_matrix[indexPivot];
@@ -326,7 +326,7 @@ Matrix Matrix::alphaCalculate(double indexPivot, int indexAlpha)
 	{
 		if (i != indexPivot)
 		{
-			double alpha = m_matrix[i][indexAlpha];
+			float_t alpha = m_matrix[i][indexAlpha];
 			matrix1.m_matrix[0] = m_matrix[i];
 			matrix1 = matrix1 - (matrix2.scalarMultiply(alpha));
 			m_matrix[i] = matrix1.m_matrix[0];
@@ -335,9 +335,9 @@ Matrix Matrix::alphaCalculate(double indexPivot, int indexAlpha)
 	return *this;
 }
 
-double Matrix::maxIndex(int indexRow, int indexColumn)
+float_t Matrix::maxIndex(int indexRow, int indexColumn)
 {
-	double max = indexRow;
+	float_t max = indexRow;
 	for (int i = indexRow; i < m_row; i++)
 	{
 		if (m_matrix[indexRow][indexColumn] < abs(m_matrix[i][indexColumn]))
@@ -354,7 +354,7 @@ Matrix Matrix::pivotGauss()
 	int j = 0;
 	for (int i = 0; i < m_row; i++)
 	{
-		double index = maxIndex(i, j);
+		float_t index = maxIndex(i, j);
 		while (m_matrix[index][j] == 0)
 		{
 			if (j == m_column - 1) { return *this; }
@@ -362,7 +362,7 @@ Matrix Matrix::pivotGauss()
 			index = maxIndex(i, j);
 		}
 		*this = swapMatrix(i, index);
-		double normalize = m_matrix[i][j];
+		float_t normalize = m_matrix[i][j];
 		cout << *this << endl;
 		if (normalize != 0)
 		{
@@ -411,14 +411,14 @@ Matrix Matrix::reversedMatrix()
 
 //Matrice TRS-------------------------------------------------------------------------------
 
-Matrix Matrix::rotateMatrix2(double angle)
+Matrix Matrix::rotateMatrix2(float_t angle)
 {
 	Matrix newMatrix(2, 2);
 	newMatrix.m_matrix = { {cosf(angle), -sinf(angle), sinf(angle), cosf(angle)} };
 	return newMatrix;
 }
 
-Matrix Matrix::rotateMatrix3(double x, double y, double z, double angle)
+Matrix Matrix::rotateMatrix3(float_t x, float_t y, float_t z, float_t angle)
 {
 	Matrix newMatrix(3, 3);
 	newMatrix.m_matrix =
@@ -446,26 +446,27 @@ Matrix Matrix::scaleMatrix3(Vector& vector)
 	return matrix;
 }
 
-Matrix Matrix::TRS(Vector& angle, Vector& transVect, Vector& scaleVect, Vector& axis)
+Matrix4x4 Matrix::TRS(Vector& angle, Vector& transVect, Vector& scaleVect)
 {
 	Matrix rotate(3, 3);
-	Matrix T(4, 4);
-	Matrix R(4, 4);
-	Matrix S(4, 4);
+	Matrix4x4 T;
+	Matrix4x4 R;
+	Matrix4x4 S;
 
-	T = T.identity();
-	T.m_matrix[0][3] = transVect.m_vector[0];
-	T.m_matrix[1][3] = transVect.m_vector[1];
-	T.m_matrix[2][3] = transVect.m_vector[2];
+	T = T.IdentityMatrix();
+	T.value[0][3] = transVect.m_vector[0];
+	T.value[1][3] = transVect.m_vector[1];
+	T.value[2][3] = transVect.m_vector[2];
 
 	Matrix rAxisX(3, 3), rAxisY(3, 3), rAxisZ(3, 3);
-	rAxisX = rotateMatrix3(axis.m_vector[0], 0, 0, angle.m_vector[0]);
-	rAxisY = rotateMatrix3(0, axis.m_vector[1], 0, angle.m_vector[1]);
-	rAxisZ = rotateMatrix3(0, 0, axis.m_vector[2], angle.m_vector[2]);
+	rAxisX = rotateMatrix3(1, 0, 0, angle.m_vector[0]);
+	rAxisY = rotateMatrix3(0, 1, 0, angle.m_vector[1]);
+	rAxisZ = rotateMatrix3(0, 0, 1, angle.m_vector[2]);
+
 
 	rotate = rAxisZ * (rAxisX * rAxisY);
 
-	R.m_matrix =
+	R.value =
 	{
 		{rotate.m_matrix[0][0], rotate.m_matrix[0][1], rotate.m_matrix[0][2], 0},
 		{rotate.m_matrix[1][0], rotate.m_matrix[1][1], rotate.m_matrix[1][2], 0},
@@ -473,10 +474,10 @@ Matrix Matrix::TRS(Vector& angle, Vector& transVect, Vector& scaleVect, Vector& 
 		{0, 0, 0, 1}
 	};
 
-	S = S.identity();
-	S.m_matrix[0][0] = scaleVect.m_vector[0];
-	S.m_matrix[1][1] = scaleVect.m_vector[1];
-	S.m_matrix[2][2] = scaleVect.m_vector[2];
+	S = S.IdentityMatrix();
+	S.value[0][0] = scaleVect.m_vector[0];
+	S.value[1][1] = scaleVect.m_vector[1];
+	S.value[2][2] = scaleVect.m_vector[2];
 
 	return (T * R) * S;
 }

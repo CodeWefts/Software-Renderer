@@ -38,6 +38,8 @@ Renderer::Renderer(uint32_t width, uint32_t height)
 
     ClearColor = Vector3(0);
 
+    m_Lights.push_back(Light((0, 0, 1), (1, 1, 1), (0, 0, 0), (0, 0, 0)));
+
     CreateFrameBuffer();
 }
 
@@ -114,7 +116,19 @@ void Renderer::ProjectionMatrix(const float fovY, const float aspectRatio, const
     };
 }
 
+void Renderer::ModelMatrix(const Vector3& translation, const Vector3& rotation, const Vector3& scale)
+{
+    Model.IdentityMatrix();
+    //Model = Matrix::TRS(rotation, );
+}
 
+Vector3 Renderer::ViewportTrans(Vector3 ndc)
+{
+    return Vector3(
+        (Width / 2.0f) * (ndc.x + 1),
+        (Height / 2.0f) * (ndc.y + 1),
+        0.5f * ndc.z + 0.5f);
+}
 
 bool Renderer::SetPixel(const uint32_t x, const uint32_t y)
 {
@@ -210,8 +224,6 @@ void Renderer::DrawLine(uint32_t x0, uint32_t y0, const uint32_t x1, const uint3
 
 void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 {
-
-
     // SET CLAMP   
     float miniX;
     float miniY;
@@ -264,10 +276,20 @@ void Renderer::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3, const Vertex& v1
 
             const Vector2 uv = v1.vUvs * w1 + v2.vUvs * w2 + v3.vUvs * w3;
 
+
+            Vector3 m_Eye = ViewportTrans(Eye);
+
+            Vector3 FragPos = Vector3(x, y, posZ);
+
+            Vector3 LightDir = Vector3(FragPos.x - m_Eye.x, FragPos.y - m_Eye.y, FragPos.z - m_Eye.z);
+
             //Load texture
             color = texture.Sample(uv.x, uv.y);
 
-            SetPixel(x, y , color);
+            // Apply Light
+            Vector3 colorApply = ApplyLights(color, v1, Eye, LightDir, FragPos);
+
+            SetPixel(x, y , colorApply);
         }
     }
 }
@@ -314,12 +336,26 @@ void Renderer::loadModel(std::vector<Vertex>& vertices)
     }
 }
 
+Vector3 Renderer::ApplyLights(Vector3 color, const Vertex& v1, Vector3 ViewPos, Vector3 LightDir, Vector3 FragPos)
+{
+    Vector3 newColor = color;
+    for (int i = 0; i < m_Lights.size(); i++)
+    {
+        LightDir = Vector3(FragPos.x - LightDir.x, FragPos.y - LightDir.y, FragPos.z - LightDir.z);
+        newColor = newColor * m_Lights[i].GlobalLighting(v1.vNormal, LightDir, color, FragPos, ViewPos);
+        //newColor = newColor * m_Lights[i].AmbientLighting();
+    }
+
+    return newColor;
+}
+
 void Renderer::Render(const std::vector<Vertex>& vertices)
 {
     //Matrix
     ViewMatrix(Eye, Center, Up, View);
     ProjectionMatrix(M_PI / 2, (float)Width / Height, 0.1f, 100.f, Projection);
     Model.IdentityMatrix();
+    //Model.ModelMatrix(const Vector3& translation, const Vector3& rotation, const Vector3& scale)
 
 
     std::vector<Vector3> NewVertices = std::vector<Vector3>(vertices.size());

@@ -15,6 +15,7 @@
 int32_t SetupGlfw()
 {
     //Check versionning
+    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
@@ -42,7 +43,7 @@ void SetupWindow(GLFWwindow* window)
     glfwMakeContextCurrent(window);
 
     gladLoadGL();
-
+    glEnable(GL_MULTISAMPLE);
     glfwSwapInterval(1); // Enable vsync
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }

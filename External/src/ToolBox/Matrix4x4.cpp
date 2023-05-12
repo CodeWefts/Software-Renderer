@@ -77,3 +77,57 @@ Matrix4x4 Matrix4x4::IdentityMatrix()
 
     return *this;
 }
+
+/*
+
+Matrix4x4 Matrix4x4::rotationMatrix3X3(float_t x, float_t y, float_t z, float_t angle)
+{
+    Matrix4x4 newMatrix;
+
+    newMatrix.value =
+    {
+        {x * x * (1 - cosf(angle)) + cosf(angle), y * x * (1 - cosf(angle)) - z * sinf(angle), z * x * (1 - cosf(angle)) + y * sinf(angle)} ,
+        {x * y * (1 - cosf(angle)) + z * sinf(angle), y * y * (1 - cosf(angle)) + cosf(angle), z * y * (1 - cosf(angle)) - x * sinf(angle)} ,
+        {x * z * (1 - cosf(angle)) - y * sinf(angle), y * z * (1 - cosf(angle)) - x * sinf(angle), z * z * (1 - cosf(angle)) + cosf(angle)}
+    };
+
+    return newMatrix;
+}
+
+Matrix4x4 Matrix4x4::TRS(Vector4& angle, Vector4& vectorTrans, Vector4& vectorScaling, Vector4& axes)
+{
+    Matrix4x4 rotation;
+    Matrix4x4 R;
+    Matrix4x4 S;
+    Matrix4x4 T;
+
+    //TRANSLATE
+    T.IdentityMatrix();
+    T.value[0][3] = vectorTrans[0];
+    T.value[1][3] = vectorTrans[1];
+    T.value[2][3] = vectorTrans[2];
+
+    //ROTATION
+    Matrix4x4 rX, rY, rZ;
+    rX = rotationMatrix3X3(axes[0], 0, 0, angle[0]);
+    rY = rotationMatrix3X3(0, axes[1], 0, angle[1]);
+    rZ = rotationMatrix3X3(0, 0, axes[2], angle[2]);
+
+    rotation = rZ * (rX * rY);
+
+    R.value =
+    {
+        {rotation.value[0][0], rotation.value[0][1], rotation.value[0][2], 0},
+        {rotation.value[1][0], rotation.value[1][1], rotation.value[1][2], 0},
+        {rotation.value[2][0] ,rotation.value[2][1], rotation.value[2][2], 0},
+        {0,0,0,1}
+    };
+
+    //SCALING
+    S.IdentityMatrix();
+    S.value[0][0] = vectorScaling[0];
+    S.value[1][1] = vectorScaling[1];
+    S.value[2][2] = vectorScaling[2];
+
+    return (T * R) * S;
+}*/

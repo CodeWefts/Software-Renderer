@@ -16,22 +16,40 @@ This project's purpose is to realise a fully 3D renderer Software.
 │   ├── src   
 │   │   └── main.cpp   
 |   └── assets
+|       ├── 3dObjectLight.png
 |       ├── girl.jpeg
 |       ├── rd_shit.jpeg
 |       ├── viking_room.jpeg
-|       └── viking_room.obj
-|       └── triangleWireframe.png
-|       └── triangleInterpolation.png
+|       ├── viking_room.obj
+|       ├── triangleWireframe.png
+|       ├── triangleInterpolation.png
 |       └── schemaSpace.png
+|       
+│── External  
+|       ├── Glad ( Folder )
+|       ├── ImGui ( Folder )
+|       ├── TinyObj ( Folder )
+|       └── ToolBox
+|               ├── matrix.cpp
+|               ├── Matrix4x4.cpp
+|               ├── vector.cpp
+|               ├── Vector3.cpp
+|               └── Vector4.cpp
+|       
 │── renderer   
 │   ├── renderer.vcxproj   
-│   ├── include*   
+│   ├── include   
 │   │   └── rdr   
-│   │       └── renderer.h   
+|   │        ├── light.h
+|   │        ├── Texture.h
+|   │        ├── Vertex.h
+│   │        └── renderer.h   
 │   └── src   
 │       ├── renderer.cpp   
 │       ├── renderer_impl.hpp   
-│       └── andyours...   
+│       ├── Texture.cpp
+│       ├── Vertex.cpp
+│       └── light.cpp 
 └── scene   
     ├── scene.vcxproj   
     ├── include   
@@ -50,7 +68,10 @@ This project's purpose is to realise a fully 3D renderer Software.
 - Triangle's filling      
 - Colors interpolation   
 - Textures interpolation + Loading    
-- Depth test / 3D object
+- Depth test / 3D object    
+- Model of illumination ( Phong )    
+    - Support de 8 lights (position,color,power,attenuation) ( not have attenuation in this project)    
+    - Configuration of materiel (emissive,ambient,diffuse,specular) (not have specular in this project)    
 
 
 ## Directive    
@@ -70,16 +91,15 @@ Interpolation is a type of estimation that finds new data points based on the ra
 When used in the context of color, it is finding one or more colors that reside between any two given colors.       
 ![Color Interpolation Triangle](./app/assets/triangleInterpolation.png)   
 
-
+3D object :
 ![3D Object](./app/assets/3dObject.png)    
-   
 
 
+3D object with Ambient / Diffuse Lights (not specular) : 
+![3D Object with Lights](./app/assets/3dObjectLight.png)    
 
-Function
----------
 
-
+IMGUI :     
 
 
 
